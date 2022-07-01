@@ -4,11 +4,13 @@ import pureconfig.ConfigSource
 import pureconfig.generic.auto._
 import zio.{Task, ULayer, ZIO, ZLayer}
 
-case class AppConfig(server: ServerConfig, redis: RedisConfig)
+case class AppConfig(server: ServerConfig, redis: RedisConfig, link: LinkConfig)
 
 case class ServerConfig(host: String, port: Int)
 
 case class RedisConfig(host: String, port: Int, expire: Int)
+
+case class LinkConfig(length: Int)
 
 trait Configuration {
   def load: Task[AppConfig]
