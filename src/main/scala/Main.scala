@@ -1,7 +1,26 @@
-import zio._
-import zio.Console.printLine
+import infra.{Configuration, ConfigurationLive, GeneratorLive, RedisLive}
+import zhttp.service.Server
+import zio.{ZIO, ZLayer}
 
-object Main extends App {
-  override def run(args: List[String]): URIO[zio.ZEnv, ExitCode] =
-    printLine("Welcome to your first ZIO app!").exitCode
+import scala.language.postfixOps
+import scala.util.Random
+
+object Main extends zio.ZIOAppDefault {
+  private def startServer(port: Int) = Server
+    .start(port = port, http = shortener.App())
+
+  private def program = for {
+    configuration <- Configuration.load
+    port           = configuration.server.port
+    server        <- startServer(port)
+  } yield server
+
+  override def run: ZIO[Any, Throwable, Nothing] = program
+    .provide(
+      ZLayer(ZIO.attempt(new Random)),
+      ConfigurationLive.layer,
+      GeneratorLive.layer,
+      RedisLive.layer,
+      shortener.ServiceLive.layer
+    )
 }

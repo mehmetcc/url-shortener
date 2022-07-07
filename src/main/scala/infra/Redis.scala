@@ -16,12 +16,16 @@ trait Redis {
   def set(key: Pair.Key, value: Pair.Value): Task[Pair.Key]
 
   def get(key: Pair.Key): IO[Option[Nothing], String]
+
+  def exists(key: Pair.Key): Task[Boolean]
 }
 
 object Redis {
   def set(key: Pair.Key, value: Pair.Value): ZIO[Redis, Throwable, Key] = ZIO.serviceWithZIO[Redis](_.set(key, value))
 
   def get(key: Pair.Key): ZIO[Redis, Option[Nothing], String] = ZIO.serviceWithZIO[Redis](_.get(key))
+
+  def exists(key: Pair.Key): ZIO[Redis, Throwable, Boolean] = ZIO.serviceWithZIO[Redis](_.exists(key))
 }
 
 case class RedisLive(pool: RedisClientPool, config: RedisConfig) extends Redis {
@@ -34,6 +38,12 @@ case class RedisLive(pool: RedisClientPool, config: RedisConfig) extends Redis {
   override def get(key: Pair.Key): IO[Option[Nothing], String] = ZIO.fromOption {
     pool.withClient { client =>
       client.get(key)
+    }
+  }
+
+  override def exists(key: Key): Task[Boolean] = ZIO.attempt {
+    pool.withClient { client =>
+      client.exists(key)
     }
   }
 }
