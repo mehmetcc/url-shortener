@@ -34,11 +34,4 @@ object App {
       failure =
         error => Response.json(ErrorResponse(error.getMessage).asJson.toString).setStatus(Status.InternalServerError)
     )
-  /*
-  yield result.fold(
-    success = result => Response.json(CreateLinkResponse(result).asJson.toString),
-    failure =
-      error => Response.json(ErrorResponse(error.getMessage).asJson.toString).setStatus(Status.InternalServerError)
-  )
-   */
 }
